@@ -1,0 +1,110 @@
+{
+  "description": "Historical observed attendance baselines per floor, day-type, and hour.",
+  "floors": {
+    "Level 04": {
+      "weekday": {
+        "8": { "expectedBooked": 12, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 38, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 42, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 42, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 36, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 38, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 40, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 41, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 40, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 32, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 14, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 07": {
+      "weekday": {
+        "8": { "expectedBooked": 22, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 64, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 72, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 73, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 65, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 68, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 72, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 71, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 70, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 55, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 25, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 09": {
+      "weekday": {
+        "8": { "expectedBooked": 28, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 75, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 82, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 83, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 75, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 78, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 82, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 81, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 80, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 62, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 28, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 12": {
+      "weekday": {
+        "8": { "expectedBooked": 30, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 80, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 86, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 87, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 78, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 82, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 86, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 85, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 84, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 68, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 30, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 15": {
+      "weekday": {
+        "8": { "expectedBooked": 32, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 86, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 92, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 93, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 85, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 88, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 92, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 91, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 90, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 72, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 35, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 18": {
+      "weekday": {
+        "8": { "expectedBooked": 25, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 72, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 78, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 79, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 70, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 74, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 77, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 76, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 75, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 60, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 28, "observedOn": "28 Aug 2026" }
+      }
+    },
+    "Level 21": {
+      "weekday": {
+        "8": { "expectedBooked": 20, "observedOn": "28 Aug 2026" },
+        "9": { "expectedBooked": 60, "observedOn": "28 Aug 2026" },
+        "10": { "expectedBooked": 67, "observedOn": "28 Aug 2026" },
+        "11": { "expectedBooked": 68, "observedOn": "28 Aug 2026" },
+        "12": { "expectedBooked": 60, "observedOn": "28 Aug 2026" },
+        "13": { "expectedBooked": 63, "observedOn": "28 Aug 2026" },
+        "14": { "expectedBooked": 66, "observedOn": "28 Aug 2026" },
+        "15": { "expectedBooked": 65, "observedOn": "28 Aug 2026" },
+        "16": { "expectedBooked": 65, "observedOn": "28 Aug 2026" },
+        "17": { "expectedBooked": 50, "observedOn": "28 Aug 2026" },
+        "18": { "expectedBooked": 22, "observedOn": "28 Aug 2026" }
+      }
+    }
+  }
+}

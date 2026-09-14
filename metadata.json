@@ -1,0 +1,6 @@
+{
+  "name": "Hot Desking Exception Board",
+  "description": "Operations exception board tracking desk booking deviations against weather- and calendar-adjusted historical baselines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
