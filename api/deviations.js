@@ -40,11 +40,15 @@ export default async function handler(req, res) {
 
     // 3. Fetch Live Conditions directly from conditions handler or fallback safely
     let attendanceFactor = 1.00;
+    let weatherFactor = 1.00;
+    let hazeFactor = 1.00;
     let weatherCondition = 'Partly Cloudy (Day)';
     let areaName = 'City';
-    let conditionsSentence = 'No attendance adjustment — clear, and no holiday nearby.';
+    let conditionsSentence = 'No attendance adjustment — clear, normal air quality, and no holiday nearby.';
     let isUnadjusted = true;
+    let airQuality = null;
     let providerForecastStatus = 'HEALTHY';
+    let providerPsiStatus = 'HEALTHY';
     let providerHolidayStatus = 'HEALTHY';
 
     try {
@@ -57,11 +61,15 @@ export default async function handler(req, res) {
       if (condResp.ok) {
         const condJson = await condResp.json();
         attendanceFactor = condJson.attendanceFactor !== undefined ? Number(condJson.attendanceFactor) : 1.00;
+        weatherFactor = condJson.weatherFactor !== undefined ? Number(condJson.weatherFactor) : 1.00;
+        hazeFactor = condJson.hazeFactor !== undefined ? Number(condJson.hazeFactor) : 1.00;
         weatherCondition = condJson.weatherForecast || 'Partly Cloudy (Day)';
         areaName = condJson.area || 'City';
-        conditionsSentence = condJson.explanationSentence || 'No attendance adjustment — clear, and no holiday nearby.';
+        conditionsSentence = condJson.explanationSentence || 'No attendance adjustment — clear, normal air quality, and no holiday nearby.';
         isUnadjusted = condJson.isUnadjusted !== undefined ? condJson.isUnadjusted : (attendanceFactor === 1.00);
+        airQuality = condJson.airQuality || null;
         providerForecastStatus = condJson.providers?.forecast?.status || 'HEALTHY';
+        providerPsiStatus = condJson.providers?.psi?.status || 'HEALTHY';
         providerHolidayStatus = condJson.providers?.holidays?.status || 'HEALTHY';
       }
     } catch {
@@ -69,6 +77,7 @@ export default async function handler(req, res) {
       attendanceFactor = 1.00;
       isUnadjusted = true;
       providerForecastStatus = 'UNREACHABLE';
+      providerPsiStatus = 'UNREACHABLE';
       conditionsSentence = 'Attendance adjustment unavailable — deviations are unadjusted.';
     }
 
@@ -160,10 +169,14 @@ export default async function handler(req, res) {
       const direction = devAdj < 0 ? 'below' : 'above';
 
       if (attendanceFactor === 1.00) {
-        claimSentence = `${primaryFloor.floor} is ${absDev}% ${direction} its usual ${dayName} rate. No attendance adjustment — clear, and no holiday nearby.`;
+        claimSentence = `${primaryFloor.floor} is ${absDev}% ${direction} its usual ${dayName} rate. No attendance adjustment — clear, normal air quality, and no holiday nearby.`;
       } else {
         const dropPercent = Math.round((1 - attendanceFactor) * 100);
-        claimSentence = `${primaryFloor.floor} is ${absDev}% ${direction} its usual ${dayName} rate. Expected attendance was already down ${dropPercent}% for ${weatherCondition.toLowerCase()}, so this is ${devAdj < -dropPercent ? 'more than weather explains' : 'within adjusted expectation'}.`;
+        const conditionLabels = [];
+        if (weatherFactor < 1.00) conditionLabels.push(weatherCondition.toLowerCase());
+        if (hazeFactor < 1.00) conditionLabels.push(`haze (PSI ${airQuality?.psi || 'elevated'})`);
+        const condSummary = conditionLabels.length > 0 ? conditionLabels.join(' and ') : 'environmental conditions';
+        claimSentence = `${primaryFloor.floor} is ${absDev}% ${direction} its usual ${dayName} rate. Expected attendance was already down ${dropPercent}% for ${condSummary}, so this is ${devAdj < -dropPercent ? 'more than conditions explain' : 'within adjusted expectation'}.`;
       }
     }
 
@@ -178,11 +191,15 @@ export default async function handler(req, res) {
       timeDisplay,
       claimSentence,
       attendanceFactor,
+      weatherFactor,
+      hazeFactor,
       weatherCondition,
       areaName,
+      airQuality,
       isUnadjusted,
       conditionsSentence,
       providerForecastStatus,
+      providerPsiStatus,
       providerHolidayStatus,
       generatedOn: bookingsFixture.generatedOn,
       persistentDisclosure: 'Desk bookings are simulated — no public API publishes this data, because it identifies individuals. The weather, holiday and transport signals are live.',

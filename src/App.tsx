@@ -15,7 +15,7 @@ import {
   ProviderStatus, 
   ScreenState 
 } from './types';
-import { SlidersHorizontal, CloudRain, Sun, Calendar, AlertTriangle } from 'lucide-react';
+import { SlidersHorizontal, CloudRain, Sun, Calendar, AlertTriangle, Wind } from 'lucide-react';
 
 export default function App() {
   const [, startTransition] = useTransition();
@@ -29,7 +29,7 @@ export default function App() {
   const [selectedHour, setSelectedHour] = useState<number>(16);
   const [selectedDayName, setSelectedDayName] = useState<string>('Monday');
   const [timeString, setTimeString] = useState<string>('16:47');
-  const [weatherOverride, setWeatherOverride] = useState<'live' | 'heavy_rain' | 'holiday_adjacent'>('live');
+  const [weatherOverride, setWeatherOverride] = useState<'live' | 'heavy_rain' | 'haze_unhealthy' | 'holiday_adjacent'>('live');
 
   // UI States
   const [screenState, setScreenState] = useState<ScreenState>('LOADING');
@@ -55,11 +55,13 @@ export default function App() {
 
       const devJson: DeviationsResponse = await devRes.json();
       
-      // If weather override scenario is active, adjust factor dynamically for demonstration
+      // If scenario override is active, adjust factor dynamically for demonstration
       if (weatherOverride === 'heavy_rain') {
         const factor = 0.88;
         const weatherCondition = 'Heavy Thundery Showers';
         devJson.attendanceFactor = factor;
+        devJson.weatherFactor = 0.88;
+        devJson.hazeFactor = 1.00;
         devJson.weatherCondition = weatherCondition;
         devJson.isUnadjusted = false;
         devJson.floors = devJson.floors.map(f => {
@@ -82,10 +84,48 @@ export default function App() {
           const dir = primary.deviationAdjusted < 0 ? 'below' : 'above';
           devJson.claimSentence = `${primary.floor} is ${absDev}% ${dir} its usual ${dayName} rate. Expected attendance was already down 12% for heavy rain, so this is ${primary.deviationAdjusted < -12 ? 'more than weather explains' : 'within weather expectation'}.`;
         }
+      } else if (weatherOverride === 'haze_unhealthy') {
+        const factor = 0.85; // 15% reduction for Unhealthy haze (PSI 145)
+        const weatherCondition = 'Hazy';
+        devJson.attendanceFactor = factor;
+        devJson.weatherFactor = 1.00;
+        devJson.hazeFactor = 0.85;
+        devJson.weatherCondition = weatherCondition;
+        devJson.isUnadjusted = false;
+        devJson.airQuality = {
+          psi: 145,
+          pm25: 98,
+          band: 'Unhealthy',
+          descriptor: 'Unhealthy Haze',
+          hazeFactor: 0.85,
+          region: 'central'
+        };
+        devJson.floors = devJson.floors.map(f => {
+          if (f.suppressed || f.baselineExpected === null) return f;
+          const adjusted = Math.round(f.baselineExpected * factor);
+          const actual = f.actualBooked ?? 0;
+          const diff = actual - adjusted;
+          const devAdj = adjusted > 0 ? Math.round(((actual - adjusted) / adjusted) * 100) : 0;
+          return {
+            ...f,
+            adjustedExpectation: adjusted,
+            difference: diff,
+            deviationAdjusted: devAdj,
+            attendanceFactor: factor
+          };
+        });
+        const primary = devJson.floors.find(f => f.floor === 'Level 12' && !f.suppressed) || devJson.floors[0];
+        if (primary && primary.deviationAdjusted !== null) {
+          const absDev = Math.abs(primary.deviationAdjusted);
+          const dir = primary.deviationAdjusted < 0 ? 'below' : 'above';
+          devJson.claimSentence = `${primary.floor} is ${absDev}% ${dir} its usual ${dayName} rate. Expected attendance was already down 15% for unhealthy haze (PSI 145), so this is ${primary.deviationAdjusted < -15 ? 'more than haze explains' : 'within haze expectation'}.`;
+        }
       } else if (weatherOverride === 'holiday_adjacent') {
         const factor = 0.80;
         const weatherCondition = 'Fair (Eve of Public Holiday)';
         devJson.attendanceFactor = factor;
+        devJson.weatherFactor = 1.00;
+        devJson.hazeFactor = 1.00;
         devJson.weatherCondition = weatherCondition;
         devJson.isUnadjusted = false;
         devJson.floors = devJson.floors.map(f => {
@@ -156,6 +196,7 @@ export default function App() {
 
   // Provider Status Resolution
   const forecastStatus: ProviderStatus = deviationsData?.providerForecastStatus || 'HEALTHY';
+  const psiStatus: ProviderStatus = deviationsData?.providerPsiStatus || 'HEALTHY';
   const holidayStatus: ProviderStatus = deviationsData?.providerHolidayStatus || 'HEALTHY';
   const transportStatus: ProviderStatus = transportData?.providerState || 'MISSING_KEY';
 
@@ -175,6 +216,7 @@ export default function App() {
         isRefreshing={isRefreshing}
         onRefresh={() => fetchData()}
         forecastStatus={forecastStatus}
+        psiStatus={psiStatus}
         holidayStatus={holidayStatus}
         transportStatus={transportStatus}
         onOpenContext={() => setIsContextModalOpen(true)}
@@ -253,7 +295,7 @@ export default function App() {
                 className={`px-2 py-1 rounded font-medium flex items-center gap-1 transition-colors ${
                   weatherOverride === 'live' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'
                 }`}
-                title="Live Weather feed from data.gov.sg"
+                title="Live Weather and PSI air quality feed from data.gov.sg"
               >
                 <Sun className="w-3 h-3 text-amber-500" />
                 <span>Live Feed</span>
@@ -269,6 +311,18 @@ export default function App() {
               >
                 <CloudRain className="w-3 h-3 text-blue-500" />
                 <span>Heavy Rain (-12%)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setWeatherOverride('haze_unhealthy')}
+                className={`px-2 py-1 rounded font-medium flex items-center gap-1 transition-colors ${
+                  weatherOverride === 'haze_unhealthy' ? 'bg-white text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'
+                }`}
+                title="Simulate Elevated Haze PSI 145 Unhealthy (-15% factor)"
+              >
+                <Wind className="w-3 h-3 text-orange-500" />
+                <span>Haze PSI 145 (-15%)</span>
               </button>
 
               <button
@@ -327,6 +381,7 @@ export default function App() {
               attendanceFactor={deviationsData.attendanceFactor}
               weatherCondition={deviationsData.weatherCondition}
               areaName={deviationsData.areaName}
+              airQuality={deviationsData.airQuality}
               isHolidayAdjacent={deviationsData.attendanceFactor < 0.9}
               isUnadjusted={deviationsData.isUnadjusted}
               claimSentence={deviationsData.claimSentence}
@@ -348,8 +403,11 @@ export default function App() {
               dayName={deviationsData.dayName}
               timeDisplay={timeString}
               attendanceFactor={deviationsData.attendanceFactor}
+              weatherFactor={deviationsData.weatherFactor}
+              hazeFactor={deviationsData.hazeFactor}
               weatherCondition={deviationsData.weatherCondition}
               areaName={deviationsData.areaName}
+              airQuality={deviationsData.airQuality}
             />
 
             {/* 7. Corroborating Transport Signal (LTA DataMall) */}

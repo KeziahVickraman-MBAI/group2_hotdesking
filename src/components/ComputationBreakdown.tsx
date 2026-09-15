@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Calculator, FileText } from 'lucide-react';
-import { FloorDeviation } from '../types';
+import { ChevronDown, ChevronRight, Calculator, FileText, Wind } from 'lucide-react';
+import { FloorDeviation, AirQualityData } from '../types';
 
 interface ComputationBreakdownProps {
   floor: FloorDeviation | null;
   dayName: string;
   timeDisplay: string;
   attendanceFactor: number;
+  weatherFactor?: number;
+  hazeFactor?: number;
   weatherCondition: string;
   areaName: string;
+  airQuality?: AirQualityData | null;
 }
 
 export const ComputationBreakdown: React.FC<ComputationBreakdownProps> = ({
@@ -16,8 +19,11 @@ export const ComputationBreakdown: React.FC<ComputationBreakdownProps> = ({
   dayName,
   timeDisplay,
   attendanceFactor,
+  weatherFactor = 1.00,
+  hazeFactor = 1.00,
   weatherCondition,
-  areaName
+  areaName,
+  airQuality
 }) => {
   // Collapsible and closed by default
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -56,6 +62,12 @@ export const ComputationBreakdown: React.FC<ComputationBreakdownProps> = ({
           <span className="text-xs text-stone-500 font-mono">
             ({floor.floor} &middot; {dayName} {timeDisplay})
           </span>
+          {airQuality && airQuality.psi !== null && (
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-stone-600 bg-stone-100 border border-stone-200 px-1.5 py-0.5 rounded">
+              <Wind className="w-3 h-3 text-stone-500" />
+              PSI {airQuality.psi}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1 text-xs text-stone-500 font-medium">
           <span>{isOpen ? 'Collapse arithmetic' : 'Expand arithmetic'}</span>
@@ -79,11 +91,31 @@ export const ComputationBreakdown: React.FC<ComputationBreakdownProps> = ({
                 </span>
               </div>
 
+              {/* Weather Forecast Factor */}
               <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-                <span className="text-stone-400">attendance factor</span>
+                <span className="text-stone-400">weather factor</span>
+                <span>
+                  <strong className="text-stone-200">{weatherFactor.toFixed(2)}</strong>{' '}
+                  <span className="text-stone-400 text-xs">({weatherCondition}, {areaName})</span>
+                </span>
+              </div>
+
+              {/* Haze / Air Quality Factor */}
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+                <span className="text-stone-400">haze / air quality factor</span>
+                <span>
+                  <strong className={hazeFactor < 1.00 ? 'text-amber-300' : 'text-stone-200'}>{hazeFactor.toFixed(2)}</strong>{' '}
+                  <span className="text-stone-400 text-xs">
+                    ({airQuality?.psi ? `PSI ${airQuality.psi} ${airQuality.descriptor}` : 'data.gov.sg PSI'})
+                  </span>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 border-t border-stone-800 pt-1">
+                <span className="text-stone-400">combined attendance factor</span>
                 <span>
                   <strong className="text-amber-300">{factor.toFixed(2)}</strong>{' '}
-                  <span className="text-stone-400 text-xs">({weatherCondition}, {areaName})</span>
+                  <span className="text-stone-400 text-xs">(weather &times; haze &times; calendar)</span>
                 </span>
               </div>
 
@@ -124,7 +156,7 @@ export const ComputationBreakdown: React.FC<ComputationBreakdownProps> = ({
             <div className="flex items-start gap-2">
               <span className="font-mono text-stone-400 select-none">2.</span>
               <p>
-                <strong>The factor:</strong> The attendance factor models macro conditions (such as severe rainfall or proximity to public holidays) that systematically suppress attendance across the entire campus, isolating true local floor anomalies.
+                <strong>The factor:</strong> The attendance factor models macro conditions (severe rainfall, elevated haze PSI, or proximity to public holidays) that systematically suppress attendance across the entire campus, isolating true local floor anomalies.
               </p>
             </div>
             <div className="flex items-start gap-2">

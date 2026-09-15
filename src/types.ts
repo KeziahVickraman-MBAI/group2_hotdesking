@@ -23,6 +23,17 @@ export interface ExcludedFloor {
   reason: string;
 }
 
+export interface AirQualityData {
+  psi: number | null;
+  pm25?: number | null;
+  band: 'Good' | 'Moderate' | 'Unhealthy' | 'Very Unhealthy' | 'Hazardous' | 'Unknown';
+  descriptor: string;
+  hazeFactor: number;
+  region: string;
+  updatedTimestamp?: string;
+  regionalPsi?: Record<string, number>;
+}
+
 export interface DeviationsResponse {
   success: boolean;
   hour: number;
@@ -31,11 +42,15 @@ export interface DeviationsResponse {
   timeDisplay: string;
   claimSentence: string;
   attendanceFactor: number;
+  weatherFactor?: number;
+  hazeFactor?: number;
   weatherCondition: string;
   areaName: string;
+  airQuality?: AirQualityData | null;
   isUnadjusted: boolean;
   conditionsSentence: string;
   providerForecastStatus: ProviderStatus;
+  providerPsiStatus?: ProviderStatus;
   providerHolidayStatus: ProviderStatus;
   generatedOn: string;
   persistentDisclosure: string;
@@ -77,6 +92,10 @@ export interface HealthResponse {
   };
   providers: {
     dataGovSg?: {
+      reachable: boolean;
+      upstreamStatusCode: number | null;
+    };
+    dataGovSgPsi?: {
       reachable: boolean;
       upstreamStatusCode: number | null;
     };

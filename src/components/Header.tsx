@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCw, Clock, Activity, CloudSun, Calendar, Car, Database, Info } from 'lucide-react';
+import { RefreshCw, Clock, Activity, CloudSun, Calendar, Car, Database, Info, Wind } from 'lucide-react';
 import { ProviderStatus } from '../types';
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
   isRefreshing: boolean;
   onRefresh: () => void;
   forecastStatus: ProviderStatus;
+  psiStatus?: ProviderStatus;
   holidayStatus: ProviderStatus;
   transportStatus: ProviderStatus;
   onOpenContext: () => void;
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   isRefreshing,
   onRefresh,
   forecastStatus,
+  psiStatus = 'HEALTHY' as ProviderStatus,
   holidayStatus,
   transportStatus,
   onOpenContext
@@ -102,6 +104,12 @@ export const Header: React.FC<HeaderProps> = ({
             <CloudSun className="w-3.5 h-3.5 text-stone-400" />
             <span className="text-stone-600">Forecast (data.gov.sg):</span>
             {getStatusBadge(forecastStatus, 'keyless')}
+          </div>
+
+          <div className="inline-flex items-center gap-1.5">
+            <Wind className="w-3.5 h-3.5 text-stone-400" />
+            <span className="text-stone-600">PSI Haze (data.gov.sg):</span>
+            {getStatusBadge(psiStatus, 'keyless')}
           </div>
 
           <div className="inline-flex items-center gap-1.5">

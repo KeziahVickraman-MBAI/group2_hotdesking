@@ -1,6 +1,6 @@
 import React from 'react';
-import { AlertTriangle, CheckCircle2, TrendingDown, TrendingUp, Sparkles, Filter } from 'lucide-react';
-import { FloorDeviation } from '../types';
+import { AlertTriangle, CheckCircle2, TrendingDown, TrendingUp, Sparkles, Filter, Wind } from 'lucide-react';
+import { FloorDeviation, AirQualityData } from '../types';
 
 interface ClaimCardProps {
   selectedFloor: FloorDeviation | null;
@@ -8,6 +8,7 @@ interface ClaimCardProps {
   attendanceFactor: number;
   weatherCondition: string;
   areaName: string;
+  airQuality?: AirQualityData | null;
   isHolidayAdjacent: boolean;
   holidayName?: string;
   isUnadjusted: boolean;
@@ -20,6 +21,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   attendanceFactor,
   weatherCondition,
   areaName,
+  airQuality,
   isHolidayAdjacent,
   holidayName,
   isUnadjusted,
@@ -38,6 +40,24 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   // Compute percentage suppressed
   const conditionDropPercent = Math.round((1 - attendanceFactor) * 100);
 
+  // Determine PSI badge coloring
+  const getPsiBadge = (band?: string) => {
+    switch (band) {
+      case 'Good':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+      case 'Moderate':
+        return 'bg-amber-100 text-amber-800 border-amber-300';
+      case 'Unhealthy':
+        return 'bg-orange-100 text-orange-900 border-orange-300';
+      case 'Very Unhealthy':
+        return 'bg-rose-100 text-rose-900 border-rose-300';
+      case 'Hazardous':
+        return 'bg-purple-100 text-purple-900 border-purple-300';
+      default:
+        return 'bg-stone-100 text-stone-700 border-stone-200';
+    }
+  };
+
   return (
     <section 
       id="ops-claim-card" 
@@ -46,7 +66,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-2 max-w-3xl">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-stone-900 text-stone-100 font-mono">
               The Decision Claim
             </span>
@@ -73,6 +93,14 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
                 Suppressed Aggregate (&lt; 5)
               </span>
             )}
+
+            {/* Real-time Air Quality / Haze pill */}
+            {airQuality && airQuality.psi !== null && (
+              <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded border font-mono ${getPsiBadge(airQuality.band)}`}>
+                <Wind className="w-3 h-3" />
+                PSI {airQuality.psi} ({airQuality.descriptor})
+              </span>
+            )}
           </div>
 
           {/* Primary Operations Sentence */}
@@ -81,12 +109,12 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
           </p>
 
           <p className="text-xs text-stone-500 leading-relaxed">
-            The decision is whether this floor needs workplace intervention (re-allocating project spaces), or whether environmental factors (heavy rainfall or holiday proximity) already explain attendance.
+            The decision is whether this floor needs workplace intervention (re-allocating project spaces), or whether environmental factors (forecast rain, elevated haze PSI, or holiday proximity) already explain attendance.
           </p>
         </div>
 
         {/* Highlight Metrics Box */}
-        <div className="flex sm:flex-row lg:flex-col items-stretch gap-3 bg-stone-50 border border-stone-200 rounded-lg p-3 sm:p-4 min-w-[240px]">
+        <div className="flex sm:flex-row lg:flex-col items-stretch gap-3 bg-stone-50 border border-stone-200 rounded-lg p-3 sm:p-4 min-w-[250px]">
           <div className="flex-1">
             <span className="text-[11px] uppercase tracking-wider text-stone-500 block font-medium">
               Lead Metric (Adjusted)
@@ -105,7 +133,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
             <span className="text-[10px] text-stone-500 block mt-0.5">
               {attendanceFactor === 1.00 
                 ? 'Deviation vs normal rate' 
-                : `Filtered for -${conditionDropPercent}% weather/calendar`}
+                : `Filtered for -${conditionDropPercent}% weather/haze/calendar`}
             </span>
           </div>
 
@@ -118,11 +146,13 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
                 {attendanceFactor.toFixed(2)}
               </span>
               <span className="text-xs text-stone-600">
-                ({weatherCondition}, {areaName})
+                ({weatherCondition}{airQuality?.psi ? `, PSI ${airQuality.psi}` : ''})
               </span>
             </div>
             <span className="text-[10px] text-stone-500 block mt-0.5">
-              {attendanceFactor === 1.00 ? 'No attendance adjustment' : `Expected baseline lowered ${conditionDropPercent}%`}
+              {attendanceFactor === 1.00 
+                ? 'No attendance adjustment' 
+                : `Expected baseline lowered ${conditionDropPercent}%`}
             </span>
           </div>
         </div>

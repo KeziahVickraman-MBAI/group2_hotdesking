@@ -53,6 +53,32 @@ export default async function handler(req, res) {
     };
   }
 
+  // 1b. Check data.gov.sg PSI Real-time Air Quality
+  const t0Psi = Date.now();
+  try {
+    const psiResp = await fetch('https://api-open.data.gov.sg/v2/real-time/api/psi', {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(4000)
+    });
+    results.providers.dataGovSgPsi = {
+      name: 'data.gov.sg (Real-Time PSI Haze)',
+      reachable: psiResp.ok,
+      upstreamStatusCode: psiResp.status,
+      latencyMs: Date.now() - t0Psi,
+      authType: 'Keyless (Singapore Open Data Licence 1.0)'
+    };
+  } catch (err) {
+    results.providers.dataGovSgPsi = {
+      name: 'data.gov.sg (Real-Time PSI Haze)',
+      reachable: false,
+      upstreamStatusCode: null,
+      error: 'UNREACHABLE',
+      detail: err instanceof Error ? err.message : String(err),
+      latencyMs: Date.now() - t0Psi,
+      authType: 'Keyless'
+    };
+  }
+
   // 2. Check Nager.Date
   const t0Holiday = Date.now();
   try {
